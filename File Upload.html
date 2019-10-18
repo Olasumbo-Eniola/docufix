@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=Pacifico|Ubuntu&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://kit.fontawesome.com/7967e81f77.js" crossorigin="anonymous">
+    /Reference: 
+//https://www.onextrapixel.com/2012/12/10/how-to-create-a-custom-file-input-with-jquery-css3-and-php/
+;(function($) {
+
+          // Browser supports HTML5 multiple file?
+          var multipleSupport = typeof $('<input/>')[0].multiple !== 'undefined',
+              isIE = /msie/i.test( navigator.userAgent );
+
+          $.fn.customFile = function() {
+
+            return this.each(function() {
+
+              var $file = $(this).addClass('custom-file-upload-hidden'), // the original file input
+                  $wrap = $('<div class="file-upload-wrapper">'),
+                  $input = $('<input type="text" class="file-upload-input" />'),
+                  // Button that will be used in non-IE browsers
+                  $button = $('<button type="button" class="file-upload-button">Select a File</button>'),
+                  // Hack for IE
+                  $label = $('<label class="file-upload-button" for="'+ $file[0].id +'">Select a File</label>');
+
+              // Hide by shifting to the left so we
+              // can still trigger events
+              $file.css({
+                position: 'absolute',
+                left: '-9999px'
+              });
+
+              $wrap.insertAfter( $file )
+                .append( $file, $input, ( isIE ? $label : $button ) );
+
+              // Prevent focus
+              $file.attr('tabIndex', -1);
+              $button.attr('tabIndex', -1);
+
+              $button.click(function () {
+                $file.focus().click(); // Open dialog
+              });
+
+              $file.change(function() {
+
+                var files = [], fileArr, filename;
+
+                // If multiple is supported then extract
+                // all filenames from the file array
+                if ( multipleSupport ) {
+                  fileArr = $file[0].files;
+                  for ( var i = 0, len = fileArr.length; i < len; i++ ) {
+                    files.push( fileArr[i].name );
+                  }
+                  filename = files.join(', ');
+
+                // If not supported then just take the value
+                // and remove the path to just show the filename
+                } else {
+                  filename = $file.val().split('\\').pop();
+                }
+
+                $input.val( filename ) // Set the value
+                  .attr('title', filename) // Show filename in title tootlip
+                  .focus(); // Regain focus
+
+              });
+
+              $input.on({
+                blur: function() { $file.trigger('blur'); },
+                keydown: function( e ) {
+                  if ( e.which === 13 ) { // Enter
+                    if ( !isIE ) { $file.trigger('click'); }
+                  } else if ( e.which === 8 || e.which === 46 ) { // Backspace & Del
+                    // On some browsers the value is read-only
+                    // with this trick we remove the old input and add
+                    // a clean clone with all the original events attached
+                    $file.replaceWith( $file = $file.clone( true ) );
+                    $file.trigger('change');
+                    $input.val('');
+                  } else if ( e.which === 9 ){ // TAB
+                    return;
+                  } else { // All other keys
+                    return false;
+                  }
+                }
+              });
+
+            });
+
+          };
+
+          // Old browser fallback
+          if ( !multipleSupport ) {
+            $( document ).on('change', 'input.customfile', function() {
+
+              var $this = $(this),
+                  // Create a unique ID so we
+                  // can attach the label to the input
+                  uniqId = 'customfile_'+ (new Date()).getTime(),
+                  $wrap = $this.parent(),
+
+                  // Filter empty input
+                  $inputs = $wrap.siblings().find('.file-upload-input')
+                    .filter(function(){ return !this.value }),
+
+                  $file = $('<input type="file" id="'+ uniqId +'" name="'+ $this.attr('name') +'"/>');
+
+              // 1ms timeout so it runs after all other events
+              // that modify the value have triggered
+              setTimeout(function() {
+                // Add a new input
+                if ( $this.val() ) {
+                  // Check for empty fields to prevent
+                  // creating new inputs when changing files
+                  if ( !$inputs.length ) {
+                    $wrap.after( $file );
+                    $file.customFile();
+                  }
+                // Remove and reorganize inputs
+                } else {
+                  $inputs.parent().remove();
+                  // Move the input so it's always last on the list
+                  $wrap.appendTo( $wrap.parent() );
+                  $wrap.find('input').focus();
+                }
+              }, 1);
+
+            });
+          }
+
+}(jQuery));
+
+$('input[type=file]').customFile();
+
+Resources
+    </script>
+    
+    <title>File Upload</title>
+    </head>
+    <body>
+        <style>
+          @import "compass/css3";
+
+@import url("https://fonts.googleapis.com/css?family=Lato");
+
+            * {
+  box-sizing: border-box;
+}
+body {
+  margin: 0px;
+  font-family: 'Ubuntu';
+}
+.nav {
+  height: 50px;
+  width: 100%;
+  background-color: black;
+  position: relative;
+}
+.nav > .nav-header {
+  display: inline;
+}
+.nav > .nav-header > .nav-title {
+  display: inline-block;
+  font-size: 22px;
+  color: #fff;
+  padding: 10px 10px 10px 10px;
+}
+.nav > .nav-btn {
+  display: none;
+}
+.nav > .nav-links {
+  display: inline;
+  float: right;
+  font-size: 18px;
+}
+.nav > .nav-links > a {
+  display: inline-block;
+  padding: 13px 10px 13px 10px;
+  text-decoration: none;
+  color: #efefef;
+}
+.nav > .nav-links > a:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.nav > #nav-check {
+  display: none;
+}
+@media (max-width:600px) {
+  .nav > .nav-btn {
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+  }
+  .nav > .nav-btn > label {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    padding: 13px;
+  }
+  .nav > .nav-btn > label:hover,.nav  #nav-check:checked ~ .nav-btn > label {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  .nav > .nav-btn > label > span {
+    display: block;
+    width: 25px;
+    height: 10px;
+    border-top: 2px solid #eee;
+  }
+  .nav > .nav-links {
+    position: absolute;
+    display: block;
+    width: 100%;
+    background-color: #333;
+    height: 0px;
+    transition: all 0.3s ease-in;
+    overflow-y: hidden;
+    top: 50px;
+    left: 0px;
+  }
+  .nav > .nav-links > a {
+    display: block;
+    width: 100%;
+  }
+  .nav > #nav-check:not(:checked) ~ .nav-links {
+    height: 0px;
+  }
+  .nav > #nav-check:checked ~ .nav-links {
+    height: calc(100vh - 50px);
+    overflow-y: auto;
+  }
+}
+
+#file-text{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;;
+}
+    #file{
+        display: flex;;
+        border-right: 2px solid black;
+        padding: 20px 30px 20px 0px;
+        align-items: center;
+    }
+    #text{
+        display: flex;
+        padding: 20px 0 20px 30px;
+        align-items: center;;
+    }
+
+#text-compare{
+    display: flex;
+    padding: 30px 60px;
+    justify-content: space-between;
+}
+    #text-1{
+        width: 44%;
+    }
+    img{
+      vertical-align: middle;
+    }
+    /*style the file button*/
+    input[type="file"]{
+      position: relative;
+      display: none;
+      float: left;
+      left: 400px;
+    }
+    .custom-file-upload{
+      border: 4px solid lightgreen;
+      background: lightgreen;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: "Ubuntu";
+    float: left;
+    left: 400px;
+    top: 477px;
+}
+input[type="submit"]{
+  position: absolute;
+  background: #000000;
+  border-radius: 30px solid #efefef;
+  text-decoration: none;
+  padding: 10x 27px;
+  display:  inline-block;
+  color: #efefef;
+  font-size: large;
+  float: center;
+  width: 160px;
+  height: 40px;
+  top: 480px;
+  left: 640px;
+}
+
+    
+
+
+        </style>
+        </head>
+        <body>
+        
+        <div class="nav">
+  <input type="checkbox" id="nav-check">
+  <div class="nav-header">
+    <div class="nav-title">
+      DOCUFIX
+    </div>
+  </div>
+  <div class="nav-btn">
+    <label for="nav-check">
+      <span></span>
+      <span></span>
+      <span></span>
+    </label>
+  </div>
+  
+  <div class="nav-links">
+<!--    <a href="DOCUFIX.png" target="_blank"></a>-->
+    <a href="#" target="_blank">About Us</a>
+    <a href="#" target="_blank">Team</a>
+    <a href="#" target="_blank">Sponsors</a>
+
+  </div>
+  <h1 id="main-text" style="left: px;" style="position: absolute;"> Compare two documents</h1>
+
+  <div id="file-text">
+      <div id="file">
+          <img class="top-icons" src="https://res.cloudinary.com/dtbjhs8a6/image/upload/v1571193844/samples/figma%20career-list/lario/xisa8mltboqmepbzjqks.png">
+          <span class="compare">File</span>
+      </div>
+
+      <div id="text">
+          <img class="top-icons" src="https://res.cloudinary.com/dtbjhs8a6/image/upload/v1571193193/samples/figma%20career-list/lario/slpij76xxh4f7bpixbr5.png">
+          <span class="compare">Text</span>
+      </div>
+      
+  </div>
+  <br><br><br>
+  <img src="https://res.cloudinary.com/olasumboeniola/image/upload/v1571398054/Doc1_1_ntpsoa.png" alt="doc1" style="float: left;"><img src="https://res.cloudinary.com/olasumboeniola/image/upload/v1571397148/placeholder_1_adt9yl.png" alt="placeholder" style="float: left;"><label class="custom-file-upload">  
+      <input type="file"/>
+      <i class="fa fa-cloud-upload"></i> Upload
+ </label><br><br><br><br>
+  <img src="https://res.cloudinary.com/olasumboeniola/image/upload/v1571395938/doc2_rzsuvn.png" alt="doc2" style="float: left;"><img src="https://res.cloudinary.com/olasumboeniola/image/upload/v1571397148/placeholder_1_adt9yl.png" alt="placeholder" style="float: left;" style="top: 600px;"><label class="custom-file-upload">
+    <input type="file"/>
+    <i class="fa fa-cloud-upload"></i> Upload
+  </label>
+
+   
+   </div>
+   <input type="submit" value="Compare">
+   
+    </body>
+</html>
